@@ -5,6 +5,29 @@ security:
       - global:
           strategy: "systemAuthorizationStrategy"
 jenkins:
+  numExecutors: 0
+  clouds:
+    - docker:
+        dockerApi:
+          dockerHost:
+            credentialsId: "docker-localhost"
+            uri: "unix:///var/run/docker.sock"
+        name: "docker"
+        templates:
+          - connector: "attach"
+            dockerTemplateBase:
+              image: "halkeye/dind-jenkins-slave"
+              privileged: true
+              tty: true
+            labelString: "docker-slave linux docker"
+            remoteFs: "/home/jenkins"
+            removeVolumes: true
+  crumbIssuer:
+    standard:
+      excludeClientIPFromCrumb: true
+  agentProtocols:
+    - "JNLP4-connect"
+    - "Ping"
   authorizationStrategy:
     projectMatrix:
       permissions:
@@ -21,6 +44,8 @@ unclassified:
     smtpPort: "25"
     smtpServer: "odin.kodekoan.com"
   gitHubPluginConfig:
+    configs:
+      - credentialsId: "github-admin-halkeye"
     hookUrl: "https://jenkins.gavinmogan.com/github-webhook/"
   githubPullRequests:
     publishedURL: "https://jenkins.gavinmogan.com"
